@@ -1,0 +1,172 @@
+<html>
+
+<head>
+    <style>
+        body {
+            background-color: rgba(255, 255, 255, 100);
+            width: 300px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .player {
+            width: 100%;
+        }
+
+        button {
+            display: inline-block;
+            border: 1px solid #eee;
+            appearance: none;
+            background-color: rgba(0, 0, 0, 0);
+            font-size: 18px;
+            line-height: 30px;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        [type="range"] {
+            display: block;
+            margin: 0 90px 0 50px;
+            height: 40px;
+        }
+
+        #play-controls {
+            padding: 5px;
+            border: 1px solid #eee;
+        }
+
+        #play-pause {
+            float: left;
+        }
+
+        #mute {
+            float: right;
+        }
+
+        #airplay {
+            float: right;
+        }
+    </style>
+</head>
+
+<body>
+    <video id="player" x-webkit-airplay="allow" class="player">
+        <source src="http://techslides.com/demos/sample-videos/small.webm" type="video/webm">
+        <source src="http://techslides.com/demos/sample-videos/small.ogv" type="video/ogg">
+        <source src="http://techslides.com/demos/sample-videos/small.mp4" type="video/mp4">
+        <source src="http://techslides.com/demos/sample-videos/small.3gp" type="video/3gp">
+    </video>
+    <!--
+        Controls from http://blog.teamtreehouse.com/building-custom-controls-for-html5-videos
+      -->
+    <div id="play-controls">
+        <button type="button" id="mute"><i class="fa fa-volume-up fa-lg"></i></button>
+        <button type="button" id="airplay"><i class="fa fa-apple fa-lg"></i></button>
+        <button type="button" id="play-pause"><i class="fa fa-play fa-lg"></i></button>
+        <input type="range" id="seek-bar" value="0">
+    </div>
+</body>
+<script>
+    // Video
+    var video = document.getElementById("player");
+
+    // Buttons
+    var playButton = document.getElementById("play-pause");
+    var muteButton = document.getElementById("mute");
+    var airPlay = document.getElementById('airplay');
+
+    // Sliders
+    var seekBar = document.getElementById("seek-bar");
+
+
+    // Event listener for the play/pause button
+    playButton.addEventListener("click", function () {
+        if (video.paused === true) {
+            // Play the video
+            video.play();
+
+            // Update the button text to 'Pause'
+            playButton.innerHTML = '<i class="fa fa-pause fa-lg"></i>';
+        } else {
+            // Pause the video
+            video.pause();
+
+            // Update the button text to 'Play'
+            playButton.innerHTML = '<i class="fa fa-play fa-lg"></i>';
+        }
+    });
+
+    // Event listener for the mute button
+    muteButton.addEventListener("click", function () {
+        if (video.muted === false) {
+            // Mute the video
+            video.muted = true;
+
+            // Update the button text
+            muteButton.innerHTML = '<i class="fa fa-volume-off fa-lg"></i>';
+        } else {
+            // Unmute the video
+            video.muted = false;
+
+            // Update the button text
+            muteButton.innerHTML = '<i class="fa fa-volume-up fa-lg"></i>';
+        }
+    });
+
+    // Event listener for the seek bar
+    seekBar.addEventListener("change", function () {
+        // Calculate the new time
+        var time = video.duration * (seekBar.value / 100);
+
+        // Update the video time
+        video.currentTime = time;
+    });
+
+    // Update the seek bar as the video plays
+    video.addEventListener("timeupdate", function () {
+        // Calculate the slider value
+        var value = (100 / video.duration) * video.currentTime;
+
+        // Update the slider value
+        seekBar.value = value;
+    });
+
+    // Pause the video when the slider handle is being dragged
+    seekBar.addEventListener("mousedown", function () {
+        video.pause();
+    });
+
+    // Play the video when the slider handle is dropped
+    seekBar.addEventListener("mouseup", function () {
+        video.play();
+    });
+
+
+    // Detect if AirPlay is available
+    // Mac OS Safari 9+ only
+    if (window.WebKitPlaybackTargetAvailabilityEvent) {
+        video.addEventListener('webkitplaybacktargetavailabilitychanged', function (event) {
+            switch (event.availability) {
+                case "available":
+                    airPlay.style.display = 'block';
+                    break;
+
+                default:
+                    airPlay.style.display = 'none';
+            }
+
+            airPlay.addEventListener('click', function () {
+                video.webkitShowPlaybackTargetPicker();
+            });
+        });
+    } else {
+        airPlay.style.display = 'none';
+    }
+
+
+</script>
+
+</html>
